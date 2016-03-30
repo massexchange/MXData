@@ -1,0 +1,1 @@
+select instId from Instrument_Attributes where attrId = {id};

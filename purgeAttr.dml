@@ -1,0 +1,11 @@
+set @id = {id};
+
+delete from Instrument_Attributes where attrId = @id;
+delete from Shard_Hidden_Attributes where attrId = @id;
+
+delete from MassExchange.Cache_Elements where attrId = @id;
+
+delete from Attributes where id = @id;
+
+-- should not return anything
+<inventoryWithAttr>(@id)
