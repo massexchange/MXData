@@ -1,1 +1,6 @@
-UPDATE Inventory set date = DATE_ADD(date, INTERVAL {months} MONTH) where mpId = {mpId};
+SET @mpId = {mpId}
+SET @monthOffset = {monthOffset}
+
+UPDATE Inventory set date = DATE_ADD(date, INTERVAL @monthOffset MONTH) where mpId = @mpId;
+UPDATE Collapsed_Catalog_Records set startDate = DATE_ADD(startDate, INTERVAL @monthOffset MONTH) where mpId = @mpId;
+UPDATE Collapsed_Catalog_Records set endDate = DATE_ADD(endDate, INTERVAL @monthOffset MONTH) where mpId = @mpId;
