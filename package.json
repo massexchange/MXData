@@ -1,0 +1,17 @@
+{
+    "name": "mx-data",
+    "version": "0.0.1",
+    "description": "",
+    "main": "render.js",
+    "preferGlobal": true,
+    "repository": {
+    "type": "git",
+        "url": "git+https://github.com/massexchange/MXData.git"
+    },
+    "bin": {
+        "mx-data": "index.js"
+    },
+    "dependencies": {
+        "nconf": "^0.8.4"
+    }
+}
