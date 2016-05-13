@@ -1,7 +1,7 @@
 select
     cg.id groupId,
     cg.mpId mpId,
-    group_concat(name, ':', value order by name asc separator '  |  ') attributes
+    group_concat(name, ':', value, ' (', attrId, ')' order by name asc separator '  |  ') attributes
 from
     Catalog_Groups cg,
     Shards sh,
@@ -16,3 +16,4 @@ where
     ia.attrId = a.id and
     a.typeId = at.id
 group by groupId
+order by count(name), attributes
