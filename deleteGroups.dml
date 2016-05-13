@@ -1,6 +1,0 @@
-SET @mpId = {mpId};
-
-delete from Collapsed_Catalog_Record_Catalog_Records where collCatRecId in (select id from Collapsed_Catalog_Records where mpId = @mpId);
-delete from Catalog_Group_Collapsed_Catalog_Records where collCatRecId in (select id from Collapsed_Catalog_Records where mpId = @mpId);
-delete from Collapsed_Catalog_Records where mpId = @mpId;
-delete from Catalog_Groups where mpId = @mpId;
