@@ -1,1 +1,0 @@
-SELECT min(concat(month(date), "/", day(date))) start, max(concat(month(date), "/", day(date))) end FROM MassExchange.Inventory where mpId = 8

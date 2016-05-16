@@ -1,3 +1,4 @@
+module.exports = mpId  => `
 set @mpId = ${mpId};
 
 delete from Catalog_Records where mpId = @mpId;
@@ -14,4 +15,4 @@ delete ds, s
 from Dfp_Inventory_Sources ds, Inventory_Sources s, InvToDelete i2d
 where
 	ds.id = s.id and
-	s.id = i2d.sourceId;
+	s.id = i2d.sourceId;`;

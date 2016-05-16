@@ -1,1 +1,0 @@
-select * from Attributes where typeId = {typeId};
