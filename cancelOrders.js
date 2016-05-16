@@ -1,4 +1,4 @@
 module.exports = mpId => `
-update MassExchange.Orders
+update Orders
 set status = "Cancelled"
 where mpId = ${mpId}`;
