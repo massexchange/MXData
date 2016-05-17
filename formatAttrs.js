@@ -1,8 +1,8 @@
-module.exports = () =>
+module.exports = (nameField = "name", valueField = "value", showId = true) =>
 `group_concat(
-    name, ':',
-    value,
-    ' (', attrId, ')'
-    order by name asc
+    ${nameField}, ':',
+    ${valueField}
+    ${showId ? ", ' (', attrId, ')'" : ""}
+    order by ${nameField} asc
     separator '  |  '
 )`;
