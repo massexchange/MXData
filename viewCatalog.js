@@ -1,6 +1,5 @@
 var formatAttrs = require("./formatAttrs");
 
-
 module.exports = (mpId, table, alias) => `
 select
     ${alias}.id id,
