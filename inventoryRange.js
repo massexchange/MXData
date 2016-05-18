@@ -1,9 +1,6 @@
-var formatDate = require("./formatDate");
+var dateRange = require("./dateRange");
 
-module.exports = mpId => `
-select
-    min(${formatDate("date")}) start,
-    max(${formatDate("date")}) end
-from Inventory
-where mpId = ${mpId};
-`;
+module.exports = mpId => dateRange(
+	"Inventory",
+	alias => `${alias}.mpId = ${mpId}`
+);
