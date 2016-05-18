@@ -1,5 +1,7 @@
 var formatDate = require("./formatDate");
 
+// courtesy of http://forums.mysql.com/read.php?20,308991,318924#msg-318924
+
 module.exports = (table, pred = "", dateField = "date") => `
 select
 	${formatDate(`a.${dateField}`)} as start,
