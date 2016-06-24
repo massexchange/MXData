@@ -7,10 +7,9 @@ nconf.argv();
 var params = nconf.get("_");
 
 if(params.length == 0) {
-    console.log(
-    `Specifiy a script to be generated:
+    console.log(`Specifiy a script to be generated:
     mx-data <script> [params...]`);
-    return;
+    process.exit(0);
 }
 
 console.log(render(params[0], params.slice(1)));
