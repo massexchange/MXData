@@ -1,7 +1,7 @@
 var tempTable = require("./tempTable");
 
 module.exports = mpId => `
-SET @mpId = ${mpId};
+set @mpId = ${mpId};
 
 ${tempTable("CollapsedToDelete", `
 	select id from Collapsed_Catalog_Records
