@@ -1,3 +1,5 @@
+var tempTable = require("./tempTable");
+
 module.exports = typeId => `
 set @typeId = ${typeId};
 
