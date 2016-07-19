@@ -21,5 +21,5 @@ where
     ) and
     ia.attrId = a.id and
     a.typeId = at.id
-group by id;
+group by id
 `;
