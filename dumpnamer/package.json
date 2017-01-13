@@ -1,0 +1,14 @@
+{
+  "name": "dumpnamer",
+  "version": "1.0.0",
+  "description": "a thing to rename dumps for quick db swapping in testing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "minimist": "^1.2.0"
+  }
+}
