@@ -1,0 +1,9 @@
+{
+  "name": "mxip",
+  "version": "1.0.0",
+  "main": "mxip.js",
+  "dependencies": {
+    "aws-sdk": "^2.3.17"
+  }
+}
+
