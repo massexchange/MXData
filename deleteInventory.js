@@ -1,5 +1,7 @@
 var tempTable = require("./tempTable");
 
+var sql = String.raw;
+
 module.exports = mpId  => `
 set @mpId = ${mpId};
 
