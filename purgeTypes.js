@@ -1,58 +1,23 @@
-const tempTable = require("./tempTable");
+const
+    util = require("./util"),
+    tempTable = require("./tempTable");
 
-const sql = String.raw;
+const { sql, table,
+    deleteWhereFieldInTable,
+    deleteWhereFieldsInTable } = util;
 
-const deleteWhere = (table, condition) => sql`
-    delete from ${table}
-    where ${condition}
-`;
+const deletionTable = name => `${name}ToDelete`;
 
-const fieldInTable = (field, table) => sql`
-    ${field} in (select * from ${table})`;
-
-const selectIdsWhereFieldInTable = memberTable => (table, field) => sql`
-    select id from ${table}
-    where ${fieldInTable(field, memberTable)}
-`;
-
-const deleteWhereFieldInTable = (table, field, memberTable) =>
-    deleteWhere(table,
-        fieldInTable(field, memberTable));
-
-const typesTable = "TypesToDelete";
-const attrsTable = "AttrsToDelete";
-const cachesTable = "CachesToDelete";
-const groupsTable = "UnitTypesGroupsToDelete";
-
-const selectIdWhereFieldInTypesTable = selectIdsWhereFieldInTable(typesTable);
-
-const alias = tableName =>
-    tableName
-        .split("_")
-        .map(part => part[0].toLowerCase())
-        .join("");
-
-const table = name => sql`
-    ${name} ${alias(name)}`;
-
-const fieldRef = (table, name) => sql`
-    ${alias(table)}.${name}`;
-
-const deleteWhereFieldsInTable = memberTable => (targetTable, ...fields) => sql`
-    delete ${alias(targetTable)}
-    from
-        ${table(targetTable)},
-        ${table(memberTable)}
-    where ${
-        fields.map(field => sql`
-            ${fieldRef(targetTable, field)} = ${fieldRef(memberTable, "id")}
-        `).join(" or\n")
-    };
-`;
+const typesTable = deletionTable("Types");
+const attrsTable = deletionTable("Attrs");
+const cachesTable = deletionTable("Caches");
+const groupsTable = deletionTable("UnitTypesGroups");
 
 const deleteWhereFieldsinAttrsTable = deleteWhereFieldsInTable(attrsTable);
 const deleteWhereFieldsinTypesTable = deleteWhereFieldsInTable(typesTable);
 const deleteWhereFieldsinGroupsTable = deleteWhereFieldsInTable(groupsTable);
+
+const selectIdWhereFieldInTypesTable = util.selectIdsWhereFieldInTable(typesTable);
 
 module.exports = (...typeIds) => sql`
 ${tempTable(typesTable).fromData(sql`
