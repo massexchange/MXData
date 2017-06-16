@@ -1,23 +1,22 @@
 const { sql } = require("./util");
 
 module.exports = name => {
-    const create = source => sql`
+    const create = sql`
         drop temporary table if exists ${name};
-        create temporary table ${name} ${source};
+        create temporary table ${name} ;
     `;
 
     return {
-        fromQuery: query  => create(sql`
-            as (
+        fromQuery: query => sql`
+            ${create} as (
                 ${query}
-            )`),
-        fromData: (schema, data) => create(sql`
-            (
+            )`,
+        fromData: (schema, data) => sql`
+            ${create} (
                 ${schema}
             );
-            insert into ${name} VALUES ${data
+            insert into ${name} values ${data
                 .map(val => `(${val})`)
-                .join(", ")}
-        `)
+                .join(", ")}`
     };
 };
