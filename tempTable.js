@@ -3,8 +3,7 @@ const { sql } = require("./util");
 module.exports = name => {
     const create = sql`
         drop temporary table if exists ${name};
-        create temporary table ${name} ;
-    `;
+        create temporary table ${name}`;
 
     return {
         fromQuery: query => sql`
@@ -17,6 +16,6 @@ module.exports = name => {
             );
             insert into ${name} values ${data
                 .map(val => `(${val})`)
-                .join(", ")}`
+                .join(", ")};`
     };
 };

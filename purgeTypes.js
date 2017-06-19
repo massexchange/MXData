@@ -22,11 +22,6 @@ const selectIdWhereFieldInTypesTable = util.selectIdsWhereFieldInTable(typesTabl
 module.exports = (...typeIds) => sql`
 ${tempTable(typesTable).fromData(sql`
     id int(10) unsigned not null`, typeIds)}
-`;
-
-(...typeIds) => sql`
-${tempTable(typesTable).fromData(sql`
-    id int(10) unsigned not null`, typeIds)}
 
 ${tempTable(cachesTable).fromQuery(
     selectIdWhereFieldInTypesTable(

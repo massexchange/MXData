@@ -7,7 +7,7 @@ const util = {};
 const isOnlyWhitespace = str =>
     str.replace(/\s/g, "").length == 0;
 
-const stripOuterEmptyLines = new TemplateTag({
+const stripOuterEmptyLines = {
     onEndResult(endResult) {
         let [ head, ...rest ] = endResult.split("\n");
         const tail = rest[rest.length - 1];
@@ -20,75 +20,97 @@ const stripOuterEmptyLines = new TemplateTag({
 
         return rest.join("\n");
     }
-});
+};
 
-const undent = new TemplateTag({
+const leadingWhitespace = /^[ \t]*(?=\S)/gm;
+
+const undent = {
     onEndResult(endResult) {
-        console.log(`String: "${endResult}"`);
-
         let resultLines = endResult.split("\n");
 
         const ignoreFirst = resultLines[0][0] != " ";
-        console.log(`Ignoring first: ${ignoreFirst}`);
-
-        // console.log(resultLines);
 
         const resultPart = ignoreFirst
             ? resultLines.slice(1).join("\n")
             : endResult;
 
-        const match = resultPart.match(/^[ \t]*(?=\S)/gm);
+        const match = resultPart.match(leadingWhitespace);
 
         // return early if there's nothing to strip
         if (match === null)
           return endResult;
 
-        // console.log(match);
-
         const indent = Math.min(...match.map(el => el.length));
         const regexp = new RegExp(`^[ \\t]{${indent}}`, "gm");
 
-        console.log(`Stripping ${indent} spaces`);
-
-        const result = indent > 0
+        return indent > 0
             ? endResult.replace(regexp, "")
             : endResult;
-
-        console.log(`Result: "${result}"\n`);
-
-        return result;
     }
-});
+};
 
-const multilineSubstitutions = new TemplateTag({
-    onSubstitution(sub, resultSoFar) {
-        console.log(`Substitution: "${sub}"`);
+const leadingSpaces = /^\s+/;
 
+const multilineSubstitutions = {
+    onSubstitution(resultSoFar, sub) {
         const lines = resultSoFar.split("\n");
-        const indent = [...lines[lines.length-1]]
-            .filter(char => char == " ").join("");
+        const lastLine = lines[lines.length-1];
 
-        console.log(`Indenting substitution ${indent.length} spaces`);
+        const foundLeadingSpaces = lastLine.match(leadingSpaces);
+        if(!foundLeadingSpaces)
+            return sub;
 
+        const indent = foundLeadingSpaces[0];
         let subLines = sub.split("\n");
-        // if(subLines[0] == "")
-        //     subLines = subLines.slice(1);
 
-        const result = [
+        return [
             subLines[0],
             ...subLines.slice(1).map(line =>
                 indent + line)
         ].join("\n");
-
-        console.log(`Substitution result: "${result}"\n`);
-
-        return result;
     }
-});
-// }, trimResultTransformer);
+};
 
-//TODO: resolve order
-const sql = util.sql = multilineSubstitutions(undent(stripOuterEmptyLines));
+const stamper = (...transformers) => {
+    const {
+        sub: subprocessors,
+        end: endprocessors
+    } = transformers.reduce((agg, { onSubstitution, onEndResult }) => {
+        if(onSubstitution)
+            agg.sub.push(onSubstitution);
+        if(onEndResult)
+            agg.end.push(onEndResult);
+
+        return agg;
+    }, {
+        sub: [],
+        end: []
+    });
+
+    return (strings, ...subs) => {
+        const lastIndex = strings.length - 1;
+        const tail = strings[lastIndex];
+
+        const result = subs
+            .map((sub, i) => [strings[i + 1], sub])
+            .reduce(
+                (soFar, [nextString, sub]) =>
+                    soFar +
+                    subprocessors.reduce((sub, processor) =>
+                        processor(soFar, sub), sub) +
+                    nextString,
+                strings[0]);
+
+        return endprocessors.reduce((end, processor) =>
+            processor(end), result);
+    };
+};
+
+const sql = util.sql = stamper(
+    stripOuterEmptyLines,
+    multilineSubstitutions,
+    undent
+);
 
 util.deleteWhere = (table, condition) => sql`
     delete from ${table}
