@@ -73,18 +73,18 @@ const multilineSubstitutions = {
 
 const stamper = (...transformers) => {
     const {
-        sub: subprocessors,
-        end: endprocessors
+        subprocessors,
+        endprocessors
     } = transformers.reduce((agg, { onSubstitution, onEndResult }) => {
         if(onSubstitution)
-            agg.sub.push(onSubstitution);
+            agg.subprocessors.push(onSubstitution);
         if(onEndResult)
-            agg.end.push(onEndResult);
+            agg.endprocessors.push(onEndResult);
 
         return agg;
     }, {
-        sub: [],
-        end: []
+        subprocessors: [],
+        endprocessors: []
     });
 
     return (strings, ...subs) => {
@@ -114,7 +114,7 @@ const sql = util.sql = stamper(
 
 util.deleteWhere = (table, condition) => sql`
     delete from ${table}
-    where ${condition}
+    where ${condition};
 `;
 
 util.fieldInTable = (field, table) => sql`

@@ -9,7 +9,7 @@ module.exports = name => {
         fromQuery: query => sql`
             ${create} as (
                 ${query}
-            )`,
+            );`,
         fromData: (schema, data) => sql`
             ${create} (
                 ${schema}
