@@ -1,6 +1,5 @@
 const
-    { stripIndent, TemplateTag, trimResultTransformer } = require("common-tags"),
-    outdent = require("outdent");
+    { stripIndent, TemplateTag, trimResultTransformer } = require("common-tags");
 
 const util = {};
 
@@ -26,7 +25,7 @@ const leadingWhitespace = /^[ \t]*(?=\S)/gm;
 
 const undent = {
     onEndResult(endResult) {
-        let resultLines = endResult.split("\n");
+        const resultLines = endResult.split("\n");
 
         const ignoreFirst = resultLines[0][0] != " ";
 
@@ -38,7 +37,7 @@ const undent = {
 
         // return early if there's nothing to strip
         if (match === null)
-          return endResult;
+            return endResult;
 
         const indent = Math.min(...match.map(el => el.length));
         const regexp = new RegExp(`^[ \\t]{${indent}}`, "gm");
@@ -54,14 +53,14 @@ const leadingSpaces = /^\s+/;
 const multilineSubstitutions = {
     onSubstitution(resultSoFar, sub) {
         const lines = resultSoFar.split("\n");
-        const lastLine = lines[lines.length-1];
+        const lastLine = lines[lines.length - 1];
 
         const foundLeadingSpaces = lastLine.match(leadingSpaces);
         if(!foundLeadingSpaces)
             return sub;
 
         const indent = foundLeadingSpaces[0];
-        let subLines = sub.split("\n");
+        const subLines = sub.toString().split("\n");
 
         return [
             subLines[0],
@@ -88,9 +87,6 @@ const stamper = (...transformers) => {
     });
 
     return (strings, ...subs) => {
-        const lastIndex = strings.length - 1;
-        const tail = strings[lastIndex];
-
         const result = subs
             .map((sub, i) => [strings[i + 1], sub])
             .reduce(
@@ -112,22 +108,10 @@ const sql = util.sql = stamper(
     undent
 );
 
-util.deleteWhere = (table, condition) => sql`
-    delete from ${table}
-    where ${condition};
-`;
-
-util.fieldInTable = (field, table) => sql`
-    ${field} in (select * from ${table})`;
-
-util.selectIdsWhereFieldInTable = memberTable => (table, field) => sql`
-    select id from ${table}
-    where ${util.fieldInTable(field, memberTable)}
-`;
-
-util.deleteWhereFieldInTable = (table, field, memberTable) =>
-    util.deleteWhere(table,
-        util.fieldInTable(field, memberTable));
+util.entriesToMap = (agg, [key, value]) => {
+    agg[key] = value;
+    return agg;
+};
 
 util.alias = tableName =>
     tableName
@@ -138,19 +122,62 @@ util.alias = tableName =>
 util.table = name => sql`
     ${name} ${util.alias(name)}`;
 
+util.deletionTable = name =>
+    `${name}_To_Delete`;
+
+util.deletionTables = entities => {
+    const tables = entities
+        .map(table => [table.toLowerCase(), {
+            name: util.deletionTable(table)
+        }]).reduce(util.entriesToMap, {});
+
+    Object.values(tables)
+        .forEach(table =>
+            table.deleteWith = util.deleteWhereFieldsInTable(table.name));
+
+    return tables;
+};
+
+util.deleteWhere = (table, condition) => sql`
+    delete from ${table}
+    where ${condition};
+`;
+
+util.fieldInTable = (field, table) => sql`
+    ${field} in (select * from ${table})`;
+
 util.fieldRef = (table, name) => sql`
     ${util.alias(table)}.${name}`;
 
-util.deleteWhereFieldsInTable = memberTable => (targetTable, ...fields) => sql`
-    delete ${util.alias(targetTable)}
-    from
-        ${util.table(targetTable)},
-        ${util.table(memberTable)}
-    where ${
-        fields.map(field => sql`
-            ${util.fieldRef(targetTable, field)} = ${util.fieldRef(memberTable, "id")}
-        `).join(" or\n")
-    };
+util.idRef = table =>
+    util.fieldRef(table, "id");
+
+util.selectIdsWhereFieldInTable = memberTable => (table, field) => sql`
+    select id from ${table}
+    where ${util.fieldInTable(field, memberTable)}
 `;
+
+util.selectWhereFieldInTable = memberTable => (table, field, fields = ["id"]) => sql`
+    select ${fields.join(", ")} from ${table}
+    where ${util.fieldInTable(field, memberTable)}
+`;
+
+util.deleteWhereFieldsInTable = memberTable => (targetTable, fields = ["id"], memberId = "id") => {
+    //if only one field
+    if(typeof fields != "object")
+        fields = [fields];
+
+    return sql`
+        delete ${util.alias(targetTable)}
+        from
+            ${util.table(targetTable)},
+            ${util.table(memberTable)}
+        where ${
+            fields.map(field => sql`
+                ${util.fieldRef(targetTable, field)} = ${util.fieldRef(memberTable, memberId)}
+            `).join(" or\n")
+        };
+    `;
+};
 
 module.exports = util;

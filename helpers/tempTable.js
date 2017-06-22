@@ -1,4 +1,5 @@
-const { sql } = require("./util");
+const
+    { sql } = require("./util");
 
 module.exports = name => {
     const create = sql`
@@ -9,13 +10,15 @@ module.exports = name => {
         fromQuery: query => sql`
             ${create} as (
                 ${query}
-            );`,
+            );
+        `,
         fromData: (schema, data) => sql`
             ${create} (
                 ${schema}
             );
             insert into ${name} values ${data
                 .map(val => `(${val})`)
-                .join(", ")};`
+                .join(", ")};
+        `
     };
 };
