@@ -1,28 +1,28 @@
 const
-    { sql, table, fieldRef, idRef } = require("../helpers/util");
+    { sql, table, aliases, fieldRef, idRef } = require("../helpers/util");
 
 var formatProtoAttr = table => sql`
     concat(${table}.key, ':', ${table}.value)`;
 
-const im = "Import_Mappings";
-const imo = "Import_Mappings_Outputs";
+const entities = ["Import_Mappings", "Import_Mappings_Outputs"];
+const tables = aliases(entities);
 
 module.exports = mpId => sql`
     select
-        ${idRef(im)} mappingId,
+        ${idRef(tables.im)} mappingId,
         ${formatProtoAttr("im")} input,
         coalesce(
             group_concat(
                 ${formatProtoAttr("imo")}
-                order by ${fieldRef(imo, "key")}, ${fieldRef(imo, "value")} asc
+                order by ${fieldRef(tables.imo, "key")}, ${fieldRef(tables.imo, "value")} asc
                 separator '  |  '
             ),
             "delete"
         ) output
-    from ${table(im)}
-        left join ${table()}
-            on ${idRef(im)} = ${fieldRef(imo, "mappingId")}
+    from ${table(tables.im)}
+        left join ${table(tables.imo)}
+            on ${idRef(tables.im)} = ${fieldRef(tables.imo, "mappingId")}
     where mpId = ${mpId}
-    group by ${idRef(im)}
-    order by input, output, count(${fieldRef(imo, "key")});
+    group by ${idRef(tables.im)}
+    order by input, output, count(${fieldRef(tables.imo, "key")});
 `;

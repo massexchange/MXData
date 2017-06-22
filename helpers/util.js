@@ -138,6 +138,11 @@ util.deletionTables = entities => {
     return tables;
 };
 
+util.aliases = entities => entities
+    .map(entity =>
+        [util.alias(entity), entity])
+    .reduce(util.entriesToMap, {});
+
 util.deleteWhere = (table, condition) => sql`
     delete from ${table}
     where ${condition};

@@ -1,14 +1,10 @@
 const
-    { sql, alias, table, fieldRef, idRef, entriesToMap } = require("../helpers/util"),
+    { sql, aliases, table, fieldRef, idRef, entriesToMap } = require("../helpers/util"),
     formatDate = require("../helpers/formatDate"),
     formatAttrs = require("../helpers/formatAttrs");
 
 const entities = ["Inventory", "Instrument_Attributes", "Attributes", "Attribute_Types"];
-
-const tables = entities
-    .map(entity =>
-        [alias(entity), entity])
-    .reduce(entriesToMap, {});
+const tables = aliases(entities);
 
 module.exports = mpId => sql`
     select

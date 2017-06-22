@@ -6,7 +6,7 @@ const
 //TODO: finish this
 module.exports = taskId => sql`
     select
-        ri.id rawId,
+        ${idRef(ri)} rawId,
         ${formatDate("date")} day,
         ${formatAttrs("`key`", "value", false)} attributes
     from
