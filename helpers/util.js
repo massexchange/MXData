@@ -143,11 +143,6 @@ util.aliases = entities => entities
         [util.alias(entity), entity])
     .reduce(util.entriesToMap, {});
 
-util.deleteWhere = (table, condition) => sql`
-    delete from ${table}
-    where ${condition};
-`;
-
 util.fieldInTable = (field, table) => sql`
     ${field} in (select * from ${table})`;
 
@@ -167,22 +162,35 @@ util.selectWhereFieldInTable = memberTable => (table, field, fields = ["id"]) =>
     where ${util.fieldInTable(field, memberTable)}
 `;
 
+util.deleteWhere = (targetTable, condition, memberTables = []) => {
+    if(typeof memberTables != "object")
+        memberTables = [memberTables];
+
+    const fromTables = memberTables.length > 0
+        ? sql`
+        from
+            ${[targetTable, ...memberTables]
+                .map(util.table).join(",\n")}
+        `
+        : `from ${targetTable}`;
+
+    return sql`
+        delete ${util.alias(targetTable)}
+        ${fromTables}
+        where ${condition};
+    `;
+};
+
 util.deleteWhereFieldsInTable = memberTable => (targetTable, fields = ["id"], memberId = "id") => {
     //if only one field
     if(typeof fields != "object")
         fields = [fields];
 
-    return sql`
-        delete ${util.alias(targetTable)}
-        from
-            ${util.table(targetTable)},
-            ${util.table(memberTable)}
-        where ${
-            fields.map(field => sql`
-                ${util.fieldRef(targetTable, field)} = ${util.fieldRef(memberTable, memberId)}
-            `).join(" or\n")
-        };
-    `;
+    const condition = fields.map(field => sql`
+        ${util.fieldRef(targetTable, field)} = ${util.fieldRef(memberTable, memberId)}
+    `).join(" or\n");
+
+    return util.deleteWhere(targetTable, condition, memberTable);
 };
 
 module.exports = util;
