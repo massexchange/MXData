@@ -162,21 +162,22 @@ util.selectWhereFieldInTable = memberTable => (table, field, fields = ["id"]) =>
     where ${util.fieldInTable(field, memberTable)}
 `;
 
+util.fromTables = (first, ...tables) =>
+    tables.length > 0
+        ? sql`
+        from
+            ${[first, ...tables]
+                .map(util.table).join(",\n")}
+        `
+        : `from ${util.table(first)}`;
+
 util.deleteWhere = (targetTable, condition, memberTables = []) => {
     if(typeof memberTables != "object")
         memberTables = [memberTables];
 
-    const fromTables = memberTables.length > 0
-        ? sql`
-        from
-            ${[targetTable, ...memberTables]
-                .map(util.table).join(",\n")}
-        `
-        : `from ${targetTable}`;
-
     return sql`
         delete ${util.alias(targetTable)}
-        ${fromTables}
+        ${util.fromTables(targetTable, ...memberTables)}
         where ${condition};
     `;
 };

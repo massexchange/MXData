@@ -16,7 +16,7 @@ module.exports = () => sql`
         ${fieldRef(prices, "pricingScheduleId")} not in (
             select * from ${used}
         )
-    `, "thing")}
+    `)}
 
     ${deleteWhere(schedules, sql`
         ${idRef(schedules)} not in (
