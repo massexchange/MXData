@@ -1,12 +1,15 @@
 const
-    { sql, table } = require("../helpers/util");
+    { sql, aliases, idRef, fieldRef, fromTables } = require("../helpers/util");
+
+const entities = [
+    "Cache_Elements",
+    "Attributes",
+    "Attribute_Types"];
+const { ce, a, at } = aliases(entities);
 
 module.exports = (typeId, mpId) => sql`
-    select a.id id, name, value
-    from
-        ${table("Cache_Elements")},
-        ${table("Attributes")},
-        ${table("Attribute_Types")}
+    select ${idRef(a)}, name, value
+    ${fromTables(entities)}
     where
         attrCacheId in (
             select id from Attribute_Caches
@@ -14,6 +17,6 @@ module.exports = (typeId, mpId) => sql`
                 mpId = @${mpId} and
                 attrTypeId = ${typeId}
         ) and
-        a.id = ce.attrId and
-        at.id = a.typeId;
+        ${idRef(a)} = ${fieldRef(ce, "attrId")} and
+        ${idRef(at)} = ${fieldRef(a, "typeId")};
 `;

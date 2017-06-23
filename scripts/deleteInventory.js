@@ -1,15 +1,20 @@
 const
-    { sql, alias, table, deletionTables } = require("../helpers/util"),
+    { sql, alias, aliases, deleteWhere, idRef, deletionTables } = require("../helpers/util"),
     tempTable = require("../helpers/tempTable");
 
 const entities = ["Cat", "Orders", "Inventory"];
-const tables = deletionTables(entities);
+const { cat, orders, inventory } = deletionTables(entities);
+
+const entities = [
+    "Dfp_Inventory_Sources",
+    "Inventory_Sources"];
+const { dis, is } = aliases(entities);
 
 module.exports = mpId  => sql`
     set @mpId = ${mpId};
 
     -- gather up relevant catRecs --
-    ${tempTable(tables.cat.name).fromQuery(sql`
+    ${tempTable(cat.name).fromQuery(sql`
         select id, inventoryId
         from Catalog_Records
         where mpId = @mpId
@@ -17,48 +22,44 @@ module.exports = mpId  => sql`
 
     -- delete relevant orders --
 
-    ${tempTable(tables.orders.name).fromQuery(sql`
+    ${tempTable(orders.name).fromQuery(sql`
         select id from Sell_Orders
         where catRecId in (
-            select id from ${tables.cat.name})
+            select id from ${cat.name})
     `)}
 
-    ${tables.orders.deleteWith("Sell_Orders")}
+    ${orders.deleteWith("Sell_Orders")}
 
-    ${tables.orders.deleteWith("Orders")}
+    ${orders.deleteWith("Orders")}
 
     -- delete pricing and records --
 
-    ${tables.cat.deleteWith("Catalog_Record_Pricing_Schedules",
+    ${cat.deleteWith("Catalog_Record_Pricing_Schedules",
         "catRecId")}
 
     delete from Pricing_Schedules
     where id in (
         select pricingId
         from Catalog_Record_Pricing_Schedules
-        where catRecId in (select id from ${tables.cat.name})
+        where catRecId in (select id from ${cat.name})
     );
 
-    ${tables.cat.deleteWith("Catalog_Records")}
+    ${cat.deleteWith("Catalog_Records")}
 
     -- delete inventory and sources --
 
-    ${tempTable(tables.inventory.name).fromQuery(sql`
+    ${tempTable(inventory.name).fromQuery(sql`
         select id, sourceId
         from Inventory
         where id in (
-            select inventoryId from ${tables.cat.name}
+            select inventoryId from ${cat.name}
         )
     `)}
 
-    ${tables.inventory.deleteWith("Inventory")}
+    ${inventory.deleteWith("Inventory")}
 
-    delete ds, s
-    from
-        Dfp_Inventory_Sources ds,
-        Inventory_Sources s,
-        ${table(tables.inventory.name)}
-    where
-        ds.id = s.id and
-        s.id = ${alias(tables.inventory.name)}.sourceId;
+    ${deleteWhere([dis, is], sql`
+        ${idRef(dis)} = ${idRef(is)} and
+        ${idRef(is)} = ${alias(inventory.name)}.sourceId
+    `, inventory.name)}
 `;

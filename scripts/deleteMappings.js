@@ -3,18 +3,18 @@ const
     tempTable = require("../helpers/tempTable");
 
 const entities = ["Mappings"];
-const tables = deletionTables(entities);
+const { mappings } = deletionTables(entities);
 
 module.exports = mappingKey => sql`
     set @mappingKey = ${mappingKey};
 
-    ${tempTable(tables.mappings.name).fromQuery(sql`
+    ${tempTable(mappings.name).fromQuery(sql`
         select id from Import_Mappings
         where \`key\` = @mappingKey
     `)}
 
-    ${tables.mappings.name("Import_Mappings_Outputs",
+    ${mappings.name("Import_Mappings_Outputs",
         "mappingId")}
 
-    ${tables.mappings.name("Import_Mappings")}
+    ${mappings.name("Import_Mappings")}
 `;
