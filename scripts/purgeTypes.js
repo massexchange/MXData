@@ -49,6 +49,6 @@ module.exports = (...typeIds) => sql`
 
     ${tables.groups.deleteWith("Unit_Type_Groups")}
 
-    ${tables.caches.deleteWith("Attribute_Types",
-        "id", "attrTypeId")}
+    ${tables.types.deleteWith("Attribute_Types",
+        "id")}
 `;
