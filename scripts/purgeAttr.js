@@ -14,6 +14,11 @@ module.exports = attrId => sql`
     delete from Cache_Elements
     where attrId = @attrId;
 
+    delete from Attribute_Dependencies
+    where
+        childId = @attrId or
+        parentId = @attrId;
+
     delete from Attributes
     where id = @attrId;
 
