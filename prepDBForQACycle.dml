@@ -1,0 +1,26 @@
+start transaction;
+
+INSERT INTO `MassExchange`.`Market_Participants` (`id`, `name`, `role`, `mediaEmail`, `mediaPhone`, `techEmail`, `techPhone`, `website`, `profile`, `status`) VALUES (NULL, 'GhostAdv1', 'ADVERTISER', 'info@massexchange.com', '1111111111', 'info@massexchange.com', '1111111111', 'http://massexchange.com', 'MX Staff Advertiser Account', 'Active');
+SET @GhostAdv1ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Market_Participants` (`id`, `name`, `role`, `mediaEmail`, `mediaPhone`, `techEmail`, `techPhone`, `website`, `profile`, `status`) VALUES (NULL, 'GhostPub1', 'PUBLISHER', 'info@massexchange.com', '2222222222', 'info@massexchange.com', '2222222222', 'http://massexchange.com', 'MX Staff Publisher Account', 'Active');
+SET @GhostPub1ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Market_Participants` (`id`, `name`, `role`, `mediaEmail`, `mediaPhone`, `techEmail`, `techPhone`, `website`, `profile`, `status`) VALUES (NULL, 'GhostAdv2', 'ADVERTISER', 'advertiser@advertis.ing', '1111111111', 'ad.tech@advertis.ing', '1111111111', 'http://advertis.ing', 'Sample Profile Text', 'Active');
+SET @GhostAdv2ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Market_Participants` (`id`, `name`, `role`, `mediaEmail`, `mediaPhone`, `techEmail`, `techPhone`, `website`, `profile`, `status`) VALUES (NULL, 'GhostPub2', 'PUBLISHER', 'puber@pub.org', '2222222222', 'pub.tech@pub.org', '2222222222', 'http://pub.org', 'Sample Profile Text', 'Active');
+SET @GhostPub2ID = LAST_INSERT_ID();
+
+INSERT INTO `MassExchange`.`Users` (`id`, `mpId`, `firstName`, `lastName`, `username`, `hashedPass`, `email`, `status`) VALUES (NULL, @GhostAdv1ID, 'GhostAdv', 'Albertson', 'ghostadv', '$2a$10$DZc87kwEyMUSSh5Y1nbtZuNdf0QZJ9rscLL0QRhWjt9IITLFR5w/W', 'adv@massexchange.com', 'Active');
+SET @GhostAdvUser1ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Users` (`id`, `mpId`, `firstName`, `lastName`, `username`, `hashedPass`, `email`, `status`) VALUES (NULL, @GhostPub1ID, 'GhostPub', 'Poo', 'ghostpub', '$2a$10$Mhw6qu5t/RH7YU14fbOtuepxxAcc0fQnwd/Aj6XQ7FG9Fnsw5nHNS', 'pub@massexchange.com', 'Active');
+SET @GhostPubUser1ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Users` (`id`, `mpId`, `firstName`, `lastName`, `username`, `hashedPass`, `email`, `status`) VALUES (NULL, @GhostAdv2ID, 'GhostAdv2', 'Albertson', 'ghostadv2', '$2a$10$turQhQ5HaDuwyWzlU6f/bur/YNTNezr4nrqTL116PPwkt.fcRnvFy', 'adv@massexchange.com', 'Active');
+SET @GhostAdvUser2ID = LAST_INSERT_ID();
+INSERT INTO `MassExchange`.`Users` (`id`, `mpId`, `firstName`, `lastName`, `username`, `hashedPass`, `email`, `status`) VALUES (NULL, @GhostPub2ID, 'GhostPub2', 'Poo', 'ghostpub2', '$2a$10$6IRIXJeG.2rtHbYOq.8SDuHIp/RsVjZYuFh5rzOTosElZ9OVaEnLi', 'pub@massexchange.com', 'Active');
+SET @GhostPubUser2ID = LAST_INSERT_ID();
+
+INSERT INTO `MassExchange`.`Users_Permissions` (`id`, `userId`, `permId`) VALUES (NULL, @GhostAdvUser1ID, '1');
+INSERT INTO `MassExchange`.`Users_Permissions` (`id`, `userId`, `permId`) VALUES (NULL, @GhostPubUser1ID, '1');
+INSERT INTO `MassExchange`.`Users_Permissions` (`id`, `userId`, `permId`) VALUES (NULL, @GhostAdvUser2ID, '1');
+INSERT INTO `MassExchange`.`Users_Permissions` (`id`, `userId`, `permId`) VALUES (NULL, @GhostPubUser2ID, '1');
+
+commit;
